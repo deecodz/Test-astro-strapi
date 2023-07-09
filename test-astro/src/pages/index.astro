@@ -1,0 +1,44 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+
+import fetchApi from '../lib/strapi';
+import type Info from '../interfaces/info';
+
+const info = await fetchApi<{
+	attributes: Info;
+}[]>({
+	endpoint: 'infos', // the content type to fetch
+	wrappedByKey: 'data', // the key to unwrap the response
+});
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<BaseHead title={ SITE_TITLE } description={ SITE_DESCRIPTION } />
+</head>
+<body class="p-1em m-0 box-border" style="width: 100vw">
+<Header title={ SITE_TITLE } />
+<main class="w-full">
+	{
+		info.map(({ attributes }) =>
+			(
+				<div class="flex flex-row items-start">
+					<div class="flex flex-col items-center justify-center">
+						<h1 class="text-4xl font-bold whitespace-nowrap">
+							{ attributes.main }
+						</h1>
+						<span>{ attributes['secondary'] } </span>
+					</div>
+					<img
+						src={ import.meta.env.STRAPI_URL + attributes['image'].data.attributes.url } />
+				</div>
+			))
+	}
+</main>
+<Footer />
+</body>
+</html>
